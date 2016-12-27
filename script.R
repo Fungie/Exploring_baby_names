@@ -165,5 +165,8 @@ famous_name_check <- function(df, name_lookup = "Jackie"){
 
 famous_name_check(baby_names, name_lookup = "Jackie")
 famous_name_check(baby_names, name_lookup = "Marilyn")
+famous_name_check(baby_names, name_lookup = "Steven")
+
+
 
 
