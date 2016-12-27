@@ -221,6 +221,8 @@ change_popularity_time(baby_names)
 change_popularity_time(baby_names, yr_1 = 1910, yr_2 = 2015)
 
 # name diversity ----------------------------------------------------------
+
+# ____ Absolute -----------------------------------------------------------
 name_diversity <- function(df){
   df <- df %>% group_by(year, sex) %>% summarise(total_unique = length(unique(name)))
   ggplot(data = df, aes(x = year, y = total_unique, color = sex)) + 
@@ -228,6 +230,21 @@ name_diversity <- function(df){
     labs(y = "Unique names")
 }
 name_diversity(df = baby_names)
+
+
+# ____ Normalised for birth rate -----------------------------------------
+name_diversity_normalised <- function(df){
+  
+  df <- df %>% group_by(year, sex) %>% 
+    summarise(total = sum(amount), total_unique = length(unique(name))) %>%
+    mutate(unique_percentage = (total_unique / total) * 100)
+  
+  ggplot(data = df, aes(x = year, y = unique_percentage, color = sex)) + 
+    geom_point() + 
+    labs(y = "Percentage of unique names")
+}
+
+name_diversity_normalised(baby_names)
 
 
 # How many births per year ------------------------------------------------
