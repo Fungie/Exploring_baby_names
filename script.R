@@ -50,6 +50,7 @@ popular_names_all_time(baby_names)
  
 # What is the most gender ambiguous name in 2013? 1945? -------------------
 
+# ____ including uncommon names -------------------------------------------
 Gender_ambig_name <- function(df, yr){
   
   # Filters for the year, aggregates to name, sex level and sums amount
@@ -81,13 +82,94 @@ Gender_ambig_name <- function(df, yr){
     guides(fill = FALSE) +
     ylab("Count") +
     xlab("Name") +
-    ggtitle(label = paste("Most gender ambigious names", yr))
+    ggtitle(label = paste("Most uncommon ambigious names", yr))
 
 }
 
 Gender_ambig_name(baby_names, yr = 2013)
 Gender_ambig_name(baby_names, yr = 1945)
 Gender_ambig_name(baby_names, yr = 2014) 
+
+
+# ____ Only common names --------------------------------------------------
+Gender_ambig_common_name <- function(df, yr = NULL){
+  if(missing(yr)){
+    
+    # only taking common names i.e, total > 100  
+    df <- df %>% group_by(name, sex) %>%
+      summarise(total = sum(amount)) %>% arrange(desc(total)) %>% filter(total >= 100)
+    
+    # Keeps all duplicates, i.e. male and female of same name
+    df <- df[duplicated(df$name) | duplicated(df$name, fromLast=TRUE), ]
+    
+    # Another dataframe that goes to name level,
+    #therefore the difference between total is due to amount of male and female
+    df_a <- df %>% group_by(name) %>% summarise(total_amt = sum(total)) %>%
+      arrange(desc(total_amt)) %>% rename(total_male_female = total_amt)
+    
+    # Joins the 2 dataframes, allowing a ratio of male female to be calculated
+    df <- left_join(df, df_a, by = "name")
+    
+    # Male/Female calculation ratio of total for each name
+    df$ratio <- df$total / df$total_male_female
+    
+    # selects ratio of 0.5 and removes duplicates for clarity.
+    # 0.5 corresponds to a name being exactly half male and half female
+    df <- df %>% filter(ratio >= 0.4 & ratio <= 0.6) %>% distinct(name,.keep_all = T) %>%
+      arrange(desc(total_male_female)) %>% head(10)
+    
+    # Visualising results
+    ggplot(data = df, aes(x = reorder(name, -total_male_female), y = total_male_female, fill = name)) + 
+      geom_bar(stat = "identity") +
+      scale_y_continuous(labels = comma) +
+      guides(fill = FALSE) +
+      ylab("Count") +
+      xlab("Name") +
+      ggtitle(label = paste("Most common gender ambigious names 1910-2015"))
+    
+  }else{
+    # only taking common names i.e, total > 100  
+    df <- df %>% filter(year == yr) %>% group_by(name, sex) %>%
+      summarise(total = sum(amount)) %>% arrange(desc(total)) %>% filter(total >= 100)
+    
+    # Keeps all duplicates, i.e. male and female of same name
+    df <- df[duplicated(df$name) | duplicated(df$name, fromLast=TRUE), ]
+    
+    # Another dataframe that goes to name level,
+    #therefore the difference between total is due to amount of male and female
+    df_a <- df %>% group_by(name) %>% summarise(total_amt = sum(total)) %>%
+      arrange(desc(total_amt)) %>% rename(total_male_female = total_amt)
+    
+    # Joins the 2 dataframes, allowing a ratio of male female to be calculated
+    df <- left_join(df, df_a, by = "name")
+    
+    # Male/Female calculation ratio of total for each name
+    df$ratio <- df$total / df$total_male_female
+    
+    # selects ratio of 0.5 and removes duplicates for clarity.
+    # 0.5 corresponds to a name being exactly half male and half female
+    df <- df %>% filter(ratio >= 0.4 & ratio <= 0.6) %>% distinct(name,.keep_all = T) %>%
+      arrange(desc(total_male_female)) %>% head(10)
+    
+    # Visualising results
+    ggplot(data = df, aes(x = reorder(name, -total_male_female), y = total_male_female, fill = name)) + 
+      geom_bar(stat = "identity") +
+      scale_y_continuous(labels = comma) +
+      guides(fill = FALSE) +
+      ylab("Count") +
+      xlab("Name") +
+      ggtitle(label = paste("Most common gender ambigious names", yr))
+  }
+}
+
+# Most ambigious names of all 
+Gender_ambig_common_name(df = baby_names)
+
+# Most ambigious names for specific years
+Gender_ambig_common_name(df = baby_names, yr = 2013)
+Gender_ambig_common_name(df = baby_names, yr = 1945)
+
+
 
 # find the name that has had the largest percentage increase in popularity since 1980 --------
 
