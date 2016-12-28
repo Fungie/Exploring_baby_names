@@ -1,21 +1,8 @@
----
-title: 'Exploring Baby Names'
-author: 'Auren Ferguson'
-date: '27 December 2016'
-output:
-  html_document:
-    fig_height: 6
-    fig_width: 10
-    highlight: tango
-    number_sections: yes
-    theme: readable
-    toc: TRUE
-    keep_md: TRUE
----
+# Exploring Baby Names
+Auren Ferguson  
+27 December 2016  
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 # Introduction
 This document explores US baby naming trends from 1910-2015. The data can be downloaded from <http://www.ssa.gov/oact/babynames/state/namesbystate.zip>
@@ -24,7 +11,8 @@ This document explores US baby naming trends from 1910-2015. The data can be dow
 ## Loading librarys
 
 
-```{r, message=FALSE}
+
+```r
 library(data.table)
 library(dplyr)
 library(ggplot2)
@@ -35,7 +23,8 @@ library(scales)
 
 The data comes in the format of names by year for each state. In order to get a national figure we have to read in the data from each and bind them together.
 
-```{r, message= F}
+
+```r
 # filelist = list.files(path = "/Users/aurenferguson/Downloads/namesbystate", pattern = ".TXT")
 # 
 # datalist = lapply(filelist, function(x)read.csv(x, header=F)) 
@@ -54,15 +43,38 @@ The data comes in the format of names by year for each state. In order to get a 
 
 The code is commented out as I have already done this and exported a national csv file which is read in.
 
-```{r, cache= TRUE}
+
+```r
 baby_names <- as.tbl(fread(input = "baby_names_all_states.csv"))
+```
+
+```
+## 
+Read 93.2% of 5743017 rows
+Read 5743017 rows and 5 (of 5) columns from 0.105 GB file in 00:00:03
+```
+
+```r
 head(baby_names)
+```
+
+```
+## # A tibble: 6 × 5
+##   state   sex  year     name amount
+##   <chr> <chr> <int>    <chr>  <int>
+## 1    AK     F  1910     Mary     14
+## 2    AK     F  1910    Annie     12
+## 3    AK     F  1910     Anna     10
+## 4    AK     F  1910 Margaret      8
+## 5    AK     F  1910    Helen      7
+## 6    AK     F  1910    Elsie      6
 ```
 
 ## Most Popular Baby Names of All Time
 Its interesting to see which are the most popular names of all time (1910-2015 anyway)
 
-```{r}
+
+```r
 popular_names_all_time <- function(df){
   df <- df %>% group_by(name) %>% summarise(total = sum(amount)) %>%
     arrange(desc(total)) %>% head(10)
@@ -76,15 +88,17 @@ popular_names_all_time <- function(df){
 }
 
 popular_names_all_time(baby_names)
- 
 ```
+
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 ## Gender Ambigious Names
 Will try and find the most gender ambiguous names of the whole data set and then on specific years. However, there are many ways to tackle this problem that will get different results. I will use two methods: finding common gender ambiguous names where there are similar amounts of male and females with same name and a method that gets the exact same amount of males and females for a specific year. This method however generally picks out unusual names with low counts.
 
 ### Common Ambigious Names
 
-```{r}
+
+```r
 Gender_ambig_common_name <- function(df, yr = NULL){
   if(missing(yr)){
     
@@ -157,12 +171,22 @@ Gender_ambig_common_name <- function(df, yr = NULL){
 
 # Most ambigious names of all 
 Gender_ambig_common_name(df = baby_names)
+```
 
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+
+```r
 # Most ambigious names for specific years
 Gender_ambig_common_name(df = baby_names, yr = 2013)
-Gender_ambig_common_name(df = baby_names, yr = 1945)
-
 ```
+
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-5-2.png)<!-- -->
+
+```r
+Gender_ambig_common_name(df = baby_names, yr = 1945)
+```
+
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-5-3.png)<!-- -->
 
 We can see that Jessie is the most common gender ambiguous name for all years, while in 2013 names such as Skyler and Armani are popular. The names from 1945 are more traditional compared to 2013. 
 
@@ -170,7 +194,8 @@ We can see that Jessie is the most common gender ambiguous name for all years, w
 This method finds the names that have the exact same amount of males and females. As mentioned earlier, this method tends to pick out unusual names with low counts. However, they are the **most ambigious names** with:
 
 $$\sum Men = \sum Female$$
-```{r}
+
+```r
 Gender_ambig_name <- function(df, yr){
   
   # Filters for the year, aggregates to name, sex level and sums amount
@@ -207,16 +232,29 @@ Gender_ambig_name <- function(df, yr){
 }
 
 Gender_ambig_name(baby_names, yr = 2013)
+```
+
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
+```r
 Gender_ambig_name(baby_names, yr = 1946)
+```
+
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-6-2.png)<!-- -->
+
+```r
 Gender_ambig_name(baby_names, yr = 2014) 
 ```
+
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-6-3.png)<!-- -->
 
 
 
 ## Names that have Increased and Decreased in Popularity with Time
 One obvious thing to think about would be to examine names whose popularity have changed over time. This section picks out the biggest increase and decrease in popularity of names over a certain time period.
 
-```{r}
+
+```r
 change_popularity_time <- function(df, yr_1 = 1980, yr_2 = 2015){
   
   if(yr_1 < yr_2){
@@ -262,8 +300,15 @@ change_popularity_time <- function(df, yr_1 = 1980, yr_2 = 2015){
 }
 
 change_popularity_time(baby_names)
+```
+
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+
+```r
 change_popularity_time(baby_names, yr_1 = 1910, yr_2 = 2015)
 ```
+
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-7-2.png)<!-- -->
 
 Over the last 25 years, Sebastian has seen the biggest jump in popularity with an increase of $\approx$ 75 times while Heather has decreased in popularity by a similar amount. While over the the whole time span, Isabella has increased by $\approx$ 150 times and has decreased by $\approx$ 25 times. The increased magnitude for the increase and lower decrease could be due to increase number being born over time. This could be perhaps improved by normalising for birth rate.
 
@@ -272,7 +317,8 @@ One interesting idea was to examine if people are naming their children with mor
 
 ### Absolute Change
 
-```{r}
+
+```r
 name_diversity <- function(df){
   df <- df %>% group_by(year, sex) %>% summarise(total_unique = length(unique(name)))
   ggplot(data = df, aes(x = year, y = total_unique, color = sex)) + 
@@ -282,11 +328,14 @@ name_diversity <- function(df){
 name_diversity(df = baby_names)
 ```
 
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
 We can see that the number of unique names does increase over time for both males and females. However, as shown below, the number of births increases over time too, so this just could be a product of an increase in births. To check this, the next section normalises the unique names by total births that year.
 
 ### Relative Change
 
-```{r}
+
+```r
 name_diversity_normalised <- function(df){
   
   df <- df %>% group_by(year, sex) %>% 
@@ -299,8 +348,9 @@ name_diversity_normalised <- function(df){
 }
 
 name_diversity_normalised(baby_names)
-
 ```
+
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
 
 This plot shows a very different trend with a 'U' shaped curve vs time. Name uniqueness is very high for both males and females in the 1910's but decreases until the mid 60's. The plot minima could be due to a large spike in the birth rate during those years (baby boomers), graph shown below and as a result its harder to name your child a unique name. Uniqueness increases again post 1975 while birthrate remains roughly stagnant. This means that uniqueness has increased over last 25 years or so, with females more than likely to have a unique name than males.
 
@@ -308,7 +358,8 @@ This plot shows a very different trend with a 'U' shaped curve vs time. Name uni
 
 ## Birthrate as a Function of Time
 
-```{r}
+
+```r
 birth_numbers_per_year <- function(df){
   df  <- df %>% group_by(year, sex) %>% summarise(total_births = sum(amount))
   ggplot(df, aes(x = year, y = total_births, color = sex)) + geom_point() + geom_line() + labs(y = "Number of births")
@@ -316,6 +367,8 @@ birth_numbers_per_year <- function(df){
 
 birth_numbers_per_year(baby_names)
 ```
+
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
 
 We can see that the birthrate increases rapidly from 1910-1967 but then drops and becomes reasonably invariant. There is a large peak in the 60's due to the baby boomer generation. Assuming the death rate decreased with time too, this shows a large population increase over time. This can be verified by (source: <https://en.wikipedia.org/wiki/Demographic_history_of_the_United_States#Historical_population>)
 
@@ -334,7 +387,8 @@ Year | Population
 ## Are Babies Named After Famous People
 One might think that babies are named after famous names of the time.
 
-```{r}
+
+```r
 famous_name_check <- function(df, name_lookup = "Jackie"){
   df <- df %>% group_by(name, year) %>% summarise(total = sum(amount)) %>% filter(name == name_lookup)
   ggplot(data = df, aes(x = year, y = total, color = name_lookup)) + 
@@ -343,21 +397,30 @@ famous_name_check <- function(df, name_lookup = "Jackie"){
 ```
 
 ### Jackie (Kennedy)
-```{r}
+
+```r
 famous_name_check(baby_names, name_lookup = "Jackie")
 ```
+
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
 We see a peak of Jackie's around 1960, this corresponds with the presidency of JFK.
 
 ### Marilyn (Monroe)
-```{r}
+
+```r
 famous_name_check(baby_names, name_lookup = "Marilyn")
 ```
+
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
 The name Marilyn became popular around 1940 to the mid 1960's. It's hard to say if Marilyn Monroe had a strong effect on the name, it's certainly not as obvious as in the case of Jackie
 
 ### Channing (Tatum)
-```{r}
+
+```r
 famous_name_check(baby_names, name_lookup = "Channing")
 ```
+
+![](Exploring_Baby_Names_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
 We focus on a modern celebrity with a slightly unusual name in the form of Channing Tatum. There is a clear spike in the amount of Channings around 2010, this corresponds to when he became famous. There is another spike around the mid 80's but I amn't aware of any famous Channings from this time.
 
 
