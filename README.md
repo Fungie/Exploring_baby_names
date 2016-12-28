@@ -7,4 +7,5 @@ The data can be downloaded from:
 http://www.ssa.gov/oact/babynames/state/namesbystate.zip
 
 
-The HTML report can be viewed here by opening Exploring Baby Names.md
+The report can be viewed here by opening Exploring Baby Names.md or better yet, by clicking:
+http://htmlpreview.github.io/?https://github.com/Fungie/Exploring_baby_names/blob/master/Exploring_Baby_Names.html
